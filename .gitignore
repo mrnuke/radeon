@@ -1,0 +1,4 @@
+mkregtable
+*_reg_safe.h
+*.o
+.*.cmd

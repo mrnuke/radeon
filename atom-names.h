@@ -55,7 +55,7 @@ static char *atom_op_names[ATOM_OP_NAMES_CNT] = {
 "DEBUG", "CTB_DS",
 };
 
-#define ATOM_TABLE_NAMES_CNT 74
+#define ATOM_TABLE_NAMES_CNT 80
 static char *atom_table_names[ATOM_TABLE_NAMES_CNT] = {
 "ASIC_Init", "GetDisplaySurfaceSize", "ASIC_RegistersInit",
 "VRAM_BlockVenderDetection", "SetClocksRatio", "MemoryControllerInit",
@@ -81,7 +81,10 @@ static char *atom_table_names[ATOM_TABLE_NAMES_CNT] = {
 "VRAM_GetCurrentInfoBlock", "DynamicMemorySettings", "MemoryTraining",
 "EnableLVDS_SS", "DFP1OutputControl", "SetVoltage", "CRT1OutputControl",
 "CRT2OutputControl", "SetupHWAssistedI2CStatus", "ClockSource",
-"MemoryDeviceInit", "EnableYUV",
+"MemoryDeviceInit", "EnableYUV", "DIG1EncoderControl", "DIG2EncoderControl",
+"DIG1TransmitterControl/UNIPHYTransmitterControl",
+"DIG2TransmitterControl/LVTMATransmitterControl",
+"ProcessAuxChannelTransaction", "DPEncoderService",
 };
 
 #define ATOM_IO_NAMES_CNT 5

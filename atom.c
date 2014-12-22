@@ -1182,6 +1182,11 @@ static int atom_execute_table_locked(struct atom_context *ctx, int index, uint32
 	ptr = base + ATOM_CT_CODE_PTR;
 
 	SDEBUG(">> execute %04X (len %d, WS %d, PS %d)\n", base, len, ws, ps);
+	
+	if (index < ATOM_TABLE_NAMES_CNT)
+		printk("ATOM: %s\n", atom_table_names[index]);
+	else
+		printk("ATOM: Unknown table index %x\n", index);
 
 	ectx.ctx = ctx;
 	ectx.ps_shift = ps / 4;

@@ -105,6 +105,9 @@ radeon-y += \
 	vce_v1_0.o \
 	vce_v2_0.o \
 
+# Add aruba atombios replacements
+radeon-y += aruba_noatom.o
+
 radeon-$(CONFIG_COMPAT) += radeon_ioc32.o
 radeon-$(CONFIG_VGA_SWITCHEROO) += radeon_atpx_handler.o
 radeon-$(CONFIG_ACPI) += radeon_acpi.o

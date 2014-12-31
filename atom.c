@@ -1172,6 +1172,7 @@ static int atom_execute_table_locked(struct atom_context *ctx, int index, uint32
 	unsigned char op;
 	atom_exec_context ectx;
 	int ret = 0;
+	int old_iotrace, process_aux_idx;
 
 	if (!base)
 		return -EINVAL;
@@ -1180,6 +1181,12 @@ static int atom_execute_table_locked(struct atom_context *ctx, int index, uint32
 	ws = CU8(base + ATOM_CT_WS_PTR);
 	ps = CU8(base + ATOM_CT_PS_PTR) & ATOM_CT_PS_MASK;
 	ptr = base + ATOM_CT_CODE_PTR;
+
+	old_iotrace = atombios_iotrace;
+	process_aux_idx =  GetIndexIntoMasterTable(COMMAND, ProcessAuxChannelTransaction);
+
+	if (index == process_aux_idx)
+		atombios_iotrace = 0;
 
 	SDEBUG(">> execute %04X (len %d, WS %d, PS %d)\n", base, len, ws, ps);
 	
@@ -1228,6 +1235,8 @@ static int atom_execute_table_locked(struct atom_context *ctx, int index, uint32
 free:
 	if (ws)
 		kfree(ectx.ws);
+
+	atombios_iotrace = old_iotrace;
 	return ret;
 }
 

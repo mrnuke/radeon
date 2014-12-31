@@ -1474,6 +1474,8 @@ union external_encoder_control {
 	EXTERNAL_ENCODER_CONTROL_PS_ALLOCATION_V3 v3;
 };
 
+extern int atombios_iotrace;
+
 static void
 atombios_external_encoder_setup(struct drm_encoder *encoder,
 				struct drm_encoder *ext_encoder,
@@ -1578,7 +1580,10 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 	}
 	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
 		       &args, sizeof(args), true);
+	if (action == 7)
+		atombios_iotrace = 1;
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
+	atombios_iotrace = 0;
 }
 
 static void

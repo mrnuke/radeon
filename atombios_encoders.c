@@ -92,6 +92,7 @@ atombios_set_backlight_level(struct radeon_encoder *radeon_encoder, u8 level)
 	DISPLAY_DEVICE_OUTPUT_CONTROL_PS_ALLOCATION args;
 	int index;
 
+	printk("%s\n", __func__);
 	if (!(rdev->mode_info.firmware_flags & ATOM_BIOS_INFO_BL_CONTROLLED_BY_GPU))
 		return;
 
@@ -368,6 +369,8 @@ atombios_dac_setup(struct drm_encoder *encoder, int action)
 	int index = 0;
 	struct radeon_encoder_atom_dac *dac_info = radeon_encoder->enc_priv;
 
+	printk("%s\n", __func__);
+
 	memset(&args, 0, sizeof(args));
 
 	switch (radeon_encoder->encoder_id) {
@@ -421,6 +424,8 @@ atombios_tv_setup(struct drm_encoder *encoder, int action)
 	struct radeon_encoder_atom_dac *dac_info = radeon_encoder->enc_priv;
 
 	memset(&args, 0, sizeof(args));
+
+	printk("%s\n", __func__);
 
 	index = GetIndexIntoMasterTable(COMMAND, TVEncoderControl);
 
@@ -511,6 +516,8 @@ atombios_dvo_setup(struct drm_encoder *encoder, int action)
 
 	memset(&args, 0, sizeof(args));
 
+	printk("%s\n", __func__);
+
 	if (!atom_parse_cmd_header(rdev->mode_info.atom_context, index, &frev, &crev))
 		return;
 
@@ -582,6 +589,8 @@ atombios_digital_setup(struct drm_encoder *encoder, int action)
 	int index = 0;
 	int hdmi_detected = 0;
 	uint8_t frev, crev;
+
+	printk("%s\n", __func__);
 
 	if (!dig)
 		return;
@@ -849,6 +858,8 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 	int dp_lane_count = 0;
 	int hpd_id = RADEON_HPD_NONE;
 
+	printk("%s\n", __func__);
+
 	if (connector) {
 		struct radeon_connector *radeon_connector = to_radeon_connector(connector);
 		struct radeon_connector_atom_dig *dig_connector =
@@ -977,6 +988,8 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 		break;
 	}
 
+	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
+		       &args, sizeof(args), true);
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
 
 }
@@ -1008,6 +1021,58 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 	int igp_lane_info = 0;
 	int dig_encoder = dig->dig_encoder;
 	int hpd_id = RADEON_HPD_NONE;
+	
+	const char* doer;
+	
+	
+	switch (action)	{
+	case ATOM_TRANSMITTER_ACTION_DISABLE:
+		doer = "DISABLE";
+		break;
+	case ATOM_TRANSMITTER_ACTION_ENABLE:
+		doer = "ENABLE";
+		break;
+	case ATOM_TRANSMITTER_ACTION_LCD_BLOFF:
+		doer = "LCD_BLOFF";
+		break;
+	case ATOM_TRANSMITTER_ACTION_LCD_BLON:
+		doer = "LCD_BLON";
+		break;
+	case ATOM_TRANSMITTER_ACTION_BL_BRIGHTNESS_CONTROL:
+		doer = "BL_BRIGHTNESS_CONTROL";
+		break;
+	case ATOM_TRANSMITTER_ACTION_LCD_SELFTEST_START:
+		doer = "LCD_SELFTEST_START";
+		break;
+	case ATOM_TRANSMITTER_ACTION_LCD_SELFTEST_STOP:
+		doer = "LCD_SELFTEST_STOP";
+		break;
+	case ATOM_TRANSMITTER_ACTION_INIT:
+		doer = "INIT";
+		break;
+	case ATOM_TRANSMITTER_ACTION_DISABLE_OUTPUT:
+		doer = "DISABLE_OUTPUT";
+		break;
+	case ATOM_TRANSMITTER_ACTION_ENABLE_OUTPUT:
+		doer = "ENABLE_OUTPUT";
+		break;
+	case ATOM_TRANSMITTER_ACTION_SETUP:
+		doer = "SETUP";
+		break;
+	case ATOM_TRANSMITTER_ACTION_SETUP_VSEMPH:
+		doer = "SETUP_VSEMPH";
+		break;
+	case ATOM_TRANSMITTER_ACTION_POWER_ON:
+		doer = "POWER_ON";
+		break;
+	case ATOM_TRANSMITTER_ACTION_POWER_OFF:
+		doer = "POWER_OFF";
+		break;
+	default:
+		doer = "UNKNOWN!!!";
+	}
+
+	printk("%s: %s (%i). lane_num %i, lane_set %i\n", __func__, doer, action, lane_num, lane_set);
 
 	if (action == ATOM_TRANSMITTER_ACTION_INIT) {
 		connector = radeon_get_connector_for_encoder_init(encoder);
@@ -1353,6 +1418,8 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 		break;
 	}
 
+	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
+		       &args, sizeof(args), true);
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
 }
 
@@ -1365,6 +1432,8 @@ atombios_set_edp_panel_power(struct drm_connector *connector, int action)
 	union dig_transmitter_control args;
 	int index = GetIndexIntoMasterTable(COMMAND, UNIPHYTransmitterControl);
 	uint8_t frev, crev;
+
+	printk("%s\n", __func__);
 
 	if (connector->connector_type != DRM_MODE_CONNECTOR_eDP)
 		goto done;
@@ -1422,6 +1491,8 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 	int dp_lane_count = 0;
 	int connector_object_id = 0;
 	u32 ext_enum = (ext_radeon_encoder->encoder_enum & ENUM_ID_MASK) >> ENUM_ID_SHIFT;
+
+	printk("%s: (%i)\n", __func__, action);
 
 	if (action == EXTERNAL_ENCODER_ACTION_V3_ENCODER_INIT)
 		connector = radeon_get_connector_for_encoder_init(encoder);
@@ -1519,6 +1590,8 @@ atombios_yuv_setup(struct drm_encoder *encoder, bool enable)
 	int index = GetIndexIntoMasterTable(COMMAND, EnableYUV);
 	uint32_t temp, reg;
 
+	printk("%s\n", __func__);
+
 	memset(&args, 0, sizeof(args));
 
 	if (rdev->family >= CHIP_R600)
@@ -1553,6 +1626,8 @@ radeon_atom_encoder_dpms_avivo(struct drm_encoder *encoder, int mode)
 	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 	DISPLAY_DEVICE_OUTPUT_CONTROL_PS_ALLOCATION args;
 	int index = 0;
+
+	printk("%s\n", __func__);
 
 	memset(&args, 0, sizeof(args));
 
@@ -1820,6 +1895,8 @@ atombios_set_encoder_crtc_source(struct drm_encoder *encoder)
 	int index = GetIndexIntoMasterTable(COMMAND, SelectCRTC_Source);
 	uint8_t frev, crev;
 	struct radeon_encoder_atom_dig *dig;
+
+	printk("%s\n", __func__);
 
 	memset(&args, 0, sizeof(args));
 
@@ -2209,6 +2286,8 @@ atombios_dac_load_detect(struct drm_encoder *encoder, struct drm_connector *conn
 	struct radeon_device *rdev = dev->dev_private;
 	struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
 	struct radeon_connector *radeon_connector = to_radeon_connector(connector);
+
+	printk("%s\n", __func__);
 
 	if (radeon_encoder->devices & (ATOM_DEVICE_TV_SUPPORT |
 				       ATOM_DEVICE_CV_SUPPORT |

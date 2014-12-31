@@ -21,14 +21,21 @@
  */
 static const uint16_t aux_ch_reg[] = {0, 0x14, 0x28, 0x40, 0x54, 0x68};
 
+static int aruba_iotrace = 0;
+
 static void aruba_write(struct radeon_device *rdev, uint32_t reg, uint32_t value)
 {
+	if (aruba_iotrace)
+		printk("\tradeon_write(0x%04x, 0x%08x);\n", reg >> 2, value);
 	WREG32_IO(reg, value);
 }
 
 static uint32_t aruba_read(struct radeon_device *rdev, uint32_t reg)
 {
-	return RREG32_IO(reg);
+	uint32_t val = RREG32_IO(reg);
+	if (aruba_iotrace)
+		printk("\tradeon_read(0x%04x); /* %08x */\n", reg >> 2, val);
+	return val;
 }
 
 

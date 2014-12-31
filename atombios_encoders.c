@@ -1576,6 +1576,8 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 		DRM_ERROR("Unknown table version: %d, %d\n", frev, crev);
 		return;
 	}
+	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
+		       &args, sizeof(args), true);
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
 }
 

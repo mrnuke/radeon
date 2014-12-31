@@ -63,6 +63,7 @@ typedef struct {
 } atom_exec_context;
 
 int atom_debug = 0;
+int atombios_iotrace = 0;
 static int atom_execute_table_locked(struct atom_context *ctx, int index, uint32_t * params);
 int atom_execute_table(struct atom_context *ctx, int index, uint32_t * params);
 
@@ -191,6 +192,8 @@ static uint32_t atom_get_src_int(atom_exec_context *ctx, uint8_t attr,
 		switch (gctx->io_mode) {
 		case ATOM_IO_MM:
 			val = gctx->card->reg_read(gctx->card, idx);
+			if (atombios_iotrace)
+				printk("\tradeon_read_mm(0x%04x); /* %08x */\n", idx, val);
 			break;
 		case ATOM_IO_PCI:
 			printk(KERN_INFO
@@ -215,6 +218,8 @@ static uint32_t atom_get_src_int(atom_exec_context *ctx, uint8_t attr,
 			    atom_iio_execute(gctx,
 					     gctx->iio[gctx->io_mode & 0x7F],
 					     idx, 0);
+			if (atombios_iotrace)
+				printk("\tradeon_read_io(0x%04x); /* %08x */\n", idx, val);
 		}
 		break;
 	case ATOM_ARG_PS:
@@ -465,6 +470,8 @@ static void atom_put_dst(atom_exec_context *ctx, int arg, uint8_t attr,
 		idx += gctx->reg_block;
 		switch (gctx->io_mode) {
 		case ATOM_IO_MM:
+			if(atombios_iotrace)
+				printk("\tradeon_write_mm(0x%04x, 0x%08x);\n", idx, val);
 			if (idx == 0)
 				gctx->card->reg_write(gctx->card, idx,
 						      val << 2);
@@ -490,6 +497,8 @@ static void atom_put_dst(atom_exec_context *ctx, int arg, uint8_t attr,
 				       gctx->io_mode & 0x7F);
 				return;
 			}
+			if(atombios_iotrace)
+				printk("\tradeon_write_io(0x%04x, 0x%08x);\n", idx, val);
 			atom_iio_execute(gctx, gctx->iio[gctx->io_mode & 0xFF],
 					 idx, val);
 		}

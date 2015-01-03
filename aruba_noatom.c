@@ -27,12 +27,12 @@ static void aruba_write(struct radeon_device *rdev, uint32_t reg, uint32_t value
 {
 	if (aruba_iotrace)
 		printk("\tradeon_write(0x%04x, 0x%08x);\n", reg >> 2, value);
-	WREG32_IO(reg, value);
+	WREG32(reg, value);
 }
 
 static uint32_t aruba_read(struct radeon_device *rdev, uint32_t reg)
 {
-	uint32_t val = RREG32_IO(reg);
+	uint32_t val = RREG32(reg);
 	if (aruba_iotrace)
 		printk("\tradeon_read(0x%04x); /* %08x */\n", reg >> 2, val);
 	return val;

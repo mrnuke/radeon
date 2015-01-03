@@ -31,6 +31,7 @@
 #include <linux/backlight.h>
 
 extern int atom_debug;
+extern int atombios_iotrace;
 
 static u8
 radeon_atom_get_backlight_level_from_reg(struct radeon_device *rdev)
@@ -1420,7 +1421,9 @@ atombios_dig_transmitter_setup(struct drm_encoder *encoder, int action, uint8_t 
 
 	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
 		       &args, sizeof(args), true);
+	atombios_iotrace = 1;
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
+	atombios_iotrace = 0;
 }
 
 bool
@@ -1473,8 +1476,6 @@ union external_encoder_control {
 	EXTERNAL_ENCODER_CONTROL_PS_ALLOCATION v1;
 	EXTERNAL_ENCODER_CONTROL_PS_ALLOCATION_V3 v3;
 };
-
-extern int atombios_iotrace;
 
 static void
 atombios_external_encoder_setup(struct drm_encoder *encoder,
@@ -1580,10 +1581,8 @@ atombios_external_encoder_setup(struct drm_encoder *encoder,
 	}
 	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
 		       &args, sizeof(args), true);
-	if (action == 7)
-		atombios_iotrace = 1;
+
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
-	atombios_iotrace = 0;
 }
 
 static void

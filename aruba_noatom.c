@@ -303,6 +303,8 @@ u8 aruba_get_backlight_level(struct radeon_encoder *radeon_encoder)
 {
 	struct radeon_encoder_atom_dig *dig = radeon_encoder->enc_priv;
 	
+	DRM_DEBUG_KMS("ARUBA: %s", __func__);
+
 	if (dig)
 		return dig->backlight_level;
 	else
@@ -314,6 +316,8 @@ void aruba_set_backlight_level(struct radeon_encoder *radeon_encoder, u8 level)
 	struct drm_device *dev = radeon_encoder->base.dev;
 	struct radeon_device *rdev = dev->dev_private;
 	struct radeon_encoder_atom_dig *dig = radeon_encoder->enc_priv;;
+
+	DRM_DEBUG_KMS("ARUBA: %s", __func__);
 
 	if (level == 0) {
 		aruba_lcd_bloff(rdev, 0);

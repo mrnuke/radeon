@@ -329,3 +329,19 @@ void aruba_set_backlight_level(struct radeon_encoder *radeon_encoder, u8 level)
 	if (dig)
 		dig->backlight_level = level;
 }
+
+#define BLON_DELAYS	0x0303
+
+void aruba_encoder_init(struct radeon_device *rdev, uint8_t connector_id)
+{
+	aruba_mask(rdev, 0x191b << 2, 0xffff, 0x0f9f);
+
+	if (connector_id != CONNECTOR_OBJECT_ID_eDP)
+		return;
+
+	aruba_write(rdev, 0x191c << 2, 0x78000001);
+	aruba_mask(rdev, 0x191d << 2, 0xff, 0x74);
+	/* FIXME: BLON_DELAYS is a hardcoded value */
+	aruba_mask(rdev, 0x191d << 2, 0xffff << 8, BLON_DELAYS << 8);
+	aruba_mask(rdev, 0x1919 << 2, 0, 1 << 25);
+}

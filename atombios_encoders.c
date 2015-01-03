@@ -2228,6 +2228,7 @@ radeon_atom_encoder_init(struct radeon_device *rdev)
 {
 	struct drm_device *dev = rdev->ddev;
 	struct drm_encoder *encoder;
+	struct radeon_connector *connector;
 
 	list_for_each_entry(encoder, &dev->mode_config.encoder_list, head) {
 		struct radeon_encoder *radeon_encoder = to_radeon_encoder(encoder);
@@ -2239,7 +2240,13 @@ radeon_atom_encoder_init(struct radeon_device *rdev)
 		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY2:
 		case ENCODER_OBJECT_ID_INTERNAL_UNIPHY3:
 		case ENCODER_OBJECT_ID_INTERNAL_KLDSCP_LVTMA:
-			atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_INIT, 0, 0);
+			connector = radeon_get_connector_for_encoder_init(encoder);
+			struct radeon_connector *radeon_connector = to_radeon_connector(connector);
+			if (rdev->family == CHIP_ARUBA)
+				aruba_encoder_init(rdev,
+						   (radeon_connector->connector_object_id & OBJECT_ID_MASK) >> OBJECT_ID_SHIFT);
+			else
+				atombios_dig_transmitter_setup(encoder, ATOM_TRANSMITTER_ACTION_INIT, 0, 0);
 			break;
 		default:
 			break;

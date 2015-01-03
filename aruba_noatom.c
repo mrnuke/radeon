@@ -229,3 +229,99 @@ ssize_t aruba_dp_aux_transfer(struct drm_dp_aux *aux, struct drm_dp_aux_msg *msg
 	
 	return ret;
 }
+
+#define DIV_UP(x, y)     (((x) + (y) - 1) / (y))
+#define PWM_MAGIC_CONST 	25000000	// 0x017d7840
+#define PWM_RESOLUTION		4095		// 0xfff
+
+static void aruba_brightness_control(struct radeon_device *rdev,
+			      uint16_t bl_pwm_freq_hz, uint8_t bl_level)
+{
+	uint32_t ticks_per_cycle, cycle_div, cycle_ctr, high_ctr;
+
+	if (bl_pwm_freq_hz == 0)
+		return;
+	if (((aruba_read(rdev, 0x019c << 2) >> 16) & 0xff) != 0x01)
+		aruba_mask(rdev, 0x1921, 0, 0x01);
+
+	ticks_per_cycle = bl_pwm_freq_hz * PWM_RESOLUTION;
+	cycle_div = DIV_UP(PWM_MAGIC_CONST, ticks_per_cycle);
+
+	aruba_mask(rdev, 0x191b << 2, 0xffff << 16, cycle_div << 16);
+
+	cycle_ctr = PWM_MAGIC_CONST / (cycle_div * bl_pwm_freq_hz);
+
+	aruba_mask(rdev, 0x1920 << 2, 0xff << 16, 0x0c << 16);
+	aruba_mask(rdev, 0x1920 << 2, 0xffff, cycle_ctr & 0xffff);
+
+	high_ctr = cycle_ctr * (bl_level + 1);
+	high_ctr >>= 4;
+	aruba_mask(rdev, 0x191e << 2, 0xffff, high_ctr & 0xffff);
+	aruba_mask(rdev, 0x191e << 2, 0, 0xc0 << 24);
+
+	aruba_mask(rdev, 0x1921 << 2, (1 << 0), 0);
+	while (((aruba_read(rdev, 0x1921 << 2) >> 8) & 0xff) == 0x01);
+}
+
+static void aruba_lcd_blon(struct radeon_device *rdev)
+{
+	if ((aruba_read(rdev, 0x1919 << 2) >> 24) != 0x01)
+		return;
+
+	msleep(0x32);
+
+	if (((aruba_read(rdev, 0x191d << 2) >> 8) & 0xff) == 0) {
+		aruba_mask(rdev, 0x191d << 2, 0, 0x03 << 24);
+	} else {
+		aruba_mask(rdev, 0x1940 << 2, 0, (1 << 16));
+		aruba_mask(rdev, 0x1919 << 2, 0, 0x03 << 24);
+		msleep(0x04);
+		aruba_mask(rdev, 0x1940 << 2, (1 << 16), 0);
+	}
+}
+
+static void aruba_lcd_bloff(struct radeon_device *rdev, uint8_t max_pclk)
+{
+	if ((aruba_read(rdev, 0x1919 << 2) >> 24) == 0x01)
+		return;
+
+	if (max_pclk != 0)
+		return;
+
+	if (((aruba_read(rdev, 0x191d << 2) >> 8) & 0xff) != 0) {
+		aruba_mask(rdev, 0x1940 << 2, 0, 0x01 << 16);
+		msleep(0x04);
+		aruba_mask(rdev, 0x1919 << 2, (1 << 24), (1 << 25));
+		aruba_mask(rdev, 0x1940 << 2, (1 << 16), 0);
+	} else {
+		aruba_mask(rdev, 0x1919 << 2, (1 << 24), (1 << 25));
+	}
+	msleep(1);
+}
+
+u8 aruba_get_backlight_level(struct radeon_encoder *radeon_encoder)
+{
+	struct radeon_encoder_atom_dig *dig = radeon_encoder->enc_priv;
+	
+	if (dig)
+		return dig->backlight_level;
+	else
+		return 0;
+}
+
+void aruba_set_backlight_level(struct radeon_encoder *radeon_encoder, u8 level)
+{
+	struct drm_device *dev = radeon_encoder->base.dev;
+	struct radeon_device *rdev = dev->dev_private;
+	struct radeon_encoder_atom_dig *dig = radeon_encoder->enc_priv;;
+
+	if (level == 0) {
+		aruba_lcd_bloff(rdev, 0);
+	} else {
+		aruba_brightness_control(rdev, 200, level);
+		aruba_lcd_blon(rdev);
+	}
+	
+	if (dig)
+		dig->backlight_level = level;
+}

@@ -28,6 +28,7 @@
 #ifndef __RADEON_ASIC_H__
 #define __RADEON_ASIC_H__
 
+#include "aruba_noatom.h"
 /*
  * common functions
  */

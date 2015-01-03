@@ -27,6 +27,7 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/radeon_drm.h>
 #include "radeon.h"
+#include "aruba_noatom.h"
 #include "atom.h"
 #include <linux/backlight.h>
 
@@ -161,6 +162,16 @@ static int radeon_atom_backlight_update_status(struct backlight_device *bd)
 	return 0;
 }
 
+static int aruba_backlight_update_status(struct backlight_device *bd)
+{
+	struct radeon_backlight_privdata *pdata = bl_get_data(bd);
+	struct radeon_encoder *radeon_encoder = pdata->encoder;
+
+	aruba_set_backlight_level(radeon_encoder, radeon_atom_bl_level(bd));
+
+	return 0;
+}
+
 static int radeon_atom_backlight_get_brightness(struct backlight_device *bd)
 {
 	struct radeon_backlight_privdata *pdata = bl_get_data(bd);
@@ -171,9 +182,22 @@ static int radeon_atom_backlight_get_brightness(struct backlight_device *bd)
 	return radeon_atom_get_backlight_level_from_reg(rdev);
 }
 
+static int aruba_backlight_get_brightness(struct backlight_device *bd)
+{
+	struct radeon_backlight_privdata *pdata = bl_get_data(bd);
+	struct radeon_encoder *radeon_encoder = pdata->encoder;
+
+	return aruba_get_backlight_level(radeon_encoder);
+}
+
 static const struct backlight_ops radeon_atom_backlight_ops = {
 	.get_brightness = radeon_atom_backlight_get_brightness,
 	.update_status	= radeon_atom_backlight_update_status,
+};
+
+static const struct backlight_ops aruba_backlight_ops = {
+	.get_brightness = aruba_backlight_get_brightness,
+	.update_status	= aruba_backlight_update_status,
 };
 
 void radeon_atom_backlight_init(struct radeon_encoder *radeon_encoder,
@@ -185,6 +209,7 @@ void radeon_atom_backlight_init(struct radeon_encoder *radeon_encoder,
 	struct backlight_properties props;
 	struct radeon_backlight_privdata *pdata;
 	struct radeon_encoder_atom_dig *dig;
+	const struct backlight_ops *bl_ops;
 	char bl_name[16];
 
 	/* Mac laptops with multiple GPUs use the gmux driver for backlight
@@ -208,6 +233,11 @@ void radeon_atom_backlight_init(struct radeon_encoder *radeon_encoder,
 		DRM_ERROR("Memory allocation failed\n");
 		goto error;
 	}
+	
+	if (rdev->family == CHIP_ARUBA)
+		bl_ops = &aruba_backlight_ops;
+	else
+		bl_ops = &radeon_atom_backlight_ops;
 
 	memset(&props, 0, sizeof(props));
 	props.max_brightness = RADEON_MAX_BL_LEVEL;
@@ -215,7 +245,7 @@ void radeon_atom_backlight_init(struct radeon_encoder *radeon_encoder,
 	snprintf(bl_name, sizeof(bl_name),
 		 "radeon_bl%d", dev->primary->index);
 	bd = backlight_device_register(bl_name, drm_connector->kdev,
-				       pdata, &radeon_atom_backlight_ops, &props);
+				       pdata, bl_ops, &props);
 	if (IS_ERR(bd)) {
 		DRM_ERROR("Backlight registration failed\n");
 		goto error;

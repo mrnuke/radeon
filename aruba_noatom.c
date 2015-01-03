@@ -126,6 +126,8 @@ static int do_aux_tran(struct radeon_device *rdev,
 		recv[i] = aux_channel_fifo_read(rdev, channel_id);
 
 	/* This extra data is lost forever. TODO: Signal an error? */
+	if (i < num_bytes_received)
+		DRM_DEBUG_KMS("Got %d extra bytez", num_bytes_received - i);
 	for (; i < num_bytes_received; i++)
 		aux_channel_fifo_read(rdev, channel_id);
 

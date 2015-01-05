@@ -73,7 +73,7 @@ static char *atom_table_names[ATOM_TABLE_NAMES_CNT] = {
 "SetCRTC_OverScan", "SetCRTC_Replication", "SelectCRTC_Source",
 "EnableGraphSurfaces", "UpdateCRTC_DoubleBufferRegisters",
 "LUT_AutoFill", "EnableHW_IconCursor", "GetMemoryClock",
-"GetEngineClock", "SetCRTC_UsingDTDTiming", "TVBootUpStdPinDetection",
+"GetEngineClock", "SetCRTC_UsingDTDTiming", "ExternalEncoderControl",
 "DFP2OutputControl", "VRAM_BlockDetectionByStrap", "MemoryCleanUp",
 "ReadEDIDFromHWAssistedI2C", "WriteOneByteToHWAssistedI2C",
 "ReadHWAssistedI2CStatus", "SpeedFanControl", "PowerConnectorDetection",

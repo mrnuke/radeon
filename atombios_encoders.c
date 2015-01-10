@@ -889,7 +889,7 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 	int dp_lane_count = 0;
 	int hpd_id = RADEON_HPD_NONE;
 
-	printk("%s\n", __func__);
+	DRM_DEBUG_KMS("%s\n", __func__);
 
 	if (connector) {
 		struct radeon_connector *radeon_connector = to_radeon_connector(connector);
@@ -1021,7 +1021,9 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 
 	print_hex_dump(KERN_WARNING, " db :",  DUMP_PREFIX_NONE, 16, 1,
 		       &args, sizeof(args), true);
+	atombios_iotrace = 1;
 	atom_execute_table(rdev->mode_info.atom_context, index, (uint32_t *)&args);
+	atombios_iotrace = 0;
 
 }
 

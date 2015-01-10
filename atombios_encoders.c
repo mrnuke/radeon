@@ -884,7 +884,7 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 	struct drm_connector *connector = radeon_get_connector_for_encoder(encoder);
 	union dig_encoder_control args;
 	int index = 0;
-	uint8_t frev, crev;
+	uint8_t frev, crev, encoder_id;
 	int dp_clock = 0;
 	int dp_lane_count = 0;
 	int hpd_id = RADEON_HPD_NONE;
@@ -904,6 +904,8 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 	/* no dig encoder assigned */
 	if (dig->dig_encoder == -1)
 		return;
+	
+	encoder_id = dig->dig_encoder;
 
 	memset(&args, 0, sizeof(args));
 
@@ -916,6 +918,46 @@ atombios_dig_encoder_setup(struct drm_encoder *encoder, int action, int panel_mo
 			index = GetIndexIntoMasterTable(COMMAND, DIG1EncoderControl);
 	}
 
+	switch (action) {
+	case ATOM_ENCODER_CMD_DP_LINK_TRAINING_START://			0x08
+		aruba_encoder_link_training_start(rdev, encoder_id);
+		goto fini;
+	case ATOM_ENCODER_CMD_DP_LINK_TRAINING_PATTERN1://		0x09
+		aruba_encoder_link_training_pattern(rdev, encoder_id, 1);
+		goto fini;
+	case ATOM_ENCODER_CMD_DP_LINK_TRAINING_PATTERN2://		0x0a
+		aruba_encoder_link_training_pattern(rdev, encoder_id, 2);
+		goto fini;
+	case ATOM_ENCODER_CMD_DP_LINK_TRAINING_PATTERN3://		0x13
+		aruba_encoder_link_training_pattern(rdev, encoder_id, 3);
+		goto fini;
+	case ATOM_ENCODER_CMD_DP_LINK_TRAINING_COMPLETE://		0x0b
+		aruba_encoder_link_training_finish(rdev, encoder_id);
+		goto fini;
+	case ATOM_ENCODER_CMD_DP_VIDEO_OFF://				0x0c
+		aruba_encoder_video_off(rdev, encoder_id);
+		goto fini;
+	case ATOM_ENCODER_CMD_DP_VIDEO_ON://				0x0d
+		aruba_encoder_video_on(rdev, encoder_id);
+		goto fini;
+	case ATOM_ENCODER_CMD_SETUP://					0x0f
+		DRM_DEBUG_KMS("Gots a pixcok of %d with dpcock of %d\n",
+			      radeon_encoder->pixel_clock / 10, dp_clock);
+		aruba_encoder_setup_dp(rdev, encoder_id,
+			    radeon_encoder->pixel_clock / 10, dp_lane_count,
+			    radeon_atom_get_bpc(encoder), dp_clock / 10);
+		goto fini;
+	case ATOM_ENCODER_CMD_SETUP_PANEL_MODE://			0x10
+		aruba_encoder_setup_panel_mode(rdev, encoder_id, panel_mode);
+		goto fini;
+	default:
+		goto oh_shit;
+	}
+
+ fini:
+	return;
+
+ oh_shit:
 	if (!atom_parse_cmd_header(rdev->mode_info.atom_context, index, &frev, &crev))
 		return;
 

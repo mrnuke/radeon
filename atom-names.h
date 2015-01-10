@@ -63,7 +63,7 @@ static char *atom_table_names[ATOM_TABLE_NAMES_CNT] = {
 "GPIOPinControl", "SetEngineClock", "SetMemoryClock", "SetPixelClock",
 "DynamicClockGating", "ResetMemoryDLL", "ResetMemoryDevice",
 "MemoryPLLInit", "EnableMemorySelfRefresh", "AdjustMemoryController",
-"EnableASIC_StaticPwrMgt", "ASIC_StaticPwrMgtStatusChange",
+"EnableASIC_StaticPwrMgt", "SetUniphyInstance",
 "DAC_LoadDetection", "TMDS2EncoderControl", "LCD1OutputControl",
 "DAC1EncoderControl", "DAC2EncoderControl", "DVOOutputControl",
 "CV1OutputControl", "SetCRTC_DPM_State", "TVEncoderControl",

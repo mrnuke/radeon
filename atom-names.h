@@ -58,7 +58,7 @@ static char *atom_op_names[ATOM_OP_NAMES_CNT] = {
 #define ATOM_TABLE_NAMES_CNT 80
 static char *atom_table_names[ATOM_TABLE_NAMES_CNT] = {
 "ASIC_Init", "GetDisplaySurfaceSize", "ASIC_RegistersInit",
-"VRAM_BlockVenderDetection", "SetClocksRatio", "MemoryControllerInit",
+"VRAM_BlockVenderDetection", "DIGxEncoderControl", "MemoryControllerInit",
 "GPIO_PinInit", "MemoryParamAdjust", "DVOEncoderControl",
 "GPIOPinControl", "SetEngineClock", "SetMemoryClock", "SetPixelClock",
 "DynamicClockGating", "ResetMemoryDLL", "ResetMemoryDevice",
